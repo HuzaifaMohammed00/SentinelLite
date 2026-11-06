@@ -1,30 +1,40 @@
+"""Module for parsing server logs and detecting potential web attacks."""
+
 import re
 
 file = "data/sample_access.log"
 
 
 def parser_ip(file_name):
-    with open(file_name, "r") as file:
+    """Extract IP addresses from the given log file."""
+
+    with open(file_name, "r", encoding="utf-8") as file:
         file = file.read()
         ip = re.findall(r"(\d+\.\d+\.\d+\.\d+)", file)
     return ip
 
 
 def parser_path(file_name):
-    with open(file_name) as file:
+    """Extract requested URL paths from the given log file."""
+
+    with open(file_name, "r", encoding="utf-8") as file:
         file = file.read()
         path = re.findall(r"GET\s(.*?)\s+HTTP", file)
     return path
 
 
 def parser_status(file_name):
-    with open(file_name) as file:
+    """Extract HTTP status codes from the given log file."""
+
+    with open(file_name, "r", encoding="utf-8") as file:
         file = file.read()
         status = re.findall(r"(\d+)$", file, re.MULTILINE)
     return status
 
 
 def classify_request(path):
+    """Classify the request path to detect SQL Injection or Unauthorized access."""
+
     path_upper = path.upper()
 
     if "UNION SELECT" in path_upper or "OR 1=1" in path_upper:
@@ -36,6 +46,8 @@ def classify_request(path):
 
 
 def parse_logs(file_name):
+    """Combine IPs, paths, and statuses into a structured list of events."""
+
     ips = parser_ip(file_name)
     pathes = parser_path(file_name)
     statuse = parser_status(file_name)
@@ -48,6 +60,8 @@ def parse_logs(file_name):
 
 
 def main():
+    """Main execution function to process logs and display alerts."""
+
     all_events = parse_logs(file)
     print(f"[+] Total events parsed: {len(all_events)}")
 
